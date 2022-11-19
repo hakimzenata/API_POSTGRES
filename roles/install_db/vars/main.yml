@@ -1,0 +1,7 @@
+---
+ORACLE_BASE: "{{ oracle_base }}"
+ORACLE_SID: "{{ oracle_db_name }}"
+ORACLE_HOME: "{{ oracle_home }}"
+LISTENER_PORT: 1521
+EM_EXPRESS_PORT: 5500
+ORACLE_PDB: "PROD"

@@ -1,0 +1,35 @@
+---
+# - name : copy l'api
+#   become_user: "vagrant"
+#   become_method: sudo
+#   become_flags: "-i"
+#   copy:
+#     dest: /home/vagrant/api/
+#     src: /home/hakim/avv/api_serve/
+#     mode: 777
+#     remote_src: False
+
+# - name : install maven et java
+#   dnf:
+#     name: "{{ item }}"
+#     state: present
+#   with_items: 
+#     - maven
+#     - java-11-openjdk
+#     - java-11-openjdk-devel
+
+
+# - name: build le jar
+#   become_user: "vagrant"
+#   become_method: sudo
+#   become_flags: "-i"
+#   shell: "mvn package"
+#     args: ["-f", "/home/vagrant/api/pom.xml"]
+
+# - name: demmarer le jar
+#   become_user: "vagrant"
+#   become_method: sudo
+#   become_flags: "-i"
+#   shell: "java"
+#     args: ['-jar', '~/api/target']
+...

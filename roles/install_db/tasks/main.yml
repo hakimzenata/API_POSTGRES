@@ -1,0 +1,137 @@
+---
+- name: 🚀  update du system
+  dnf:
+    update_cache: true
+
+- name: 🚀  install epel-release
+  dnf:
+    name: epel-release
+    update_cache: true
+
+- name: 🚀  Installation des dépendances
+  dnf:
+    name: "{{ item }}"
+    update_cache: true
+    state: present
+  with_items:
+    - unzip
+    - https://yum.oracle.com/repo/OracleLinux/OL8/appstream/x86_64/getPackage/oracle-database-preinstall-21c-1.0-1.el8.x86_64.rpm
+    - curl
+    - wget
+    - zip
+    - dnf-utils
+    - vim
+
+- name: 🚀  configurer du nom de l'hôte
+  hostname:
+    name:  "{{ oracle_hostname }}"
+
+- name: 🚀  ajouter l'ip dans le réseau privé d'oracle dans les hosts
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ ansible_eth1.ipv4.address }} {{ oracle_hostname }}"
+    state: present
+
+
+- name: 🚀  configuration des variable d'environnement
+  lineinfile: dest={{ oracle_user_home }}/.bashrc state=present line={{ item }} 
+  with_items:
+      - "export ORACLE_HOME={{ ORACLE_HOME }}"
+      - "export ORACLE_BASE={{ ORACLE_BASE }}"
+      - "export ORACLE_SID={{ ORACLE_SID }}"
+      - "export LISTENER_PORT={{ LISTENER_PORT }}"
+      - "export EM_EXPRESS_PORT={{ EM_EXPRESS_PORT }}"
+      - "export ORACLE_PDB={{ ORACLE_PDB }}"
+      - "export PATH=$ORACLE_HOME/bin:$PATH"
+      - "export LD_LIBRARY_PATH=$ORACLE_HOME/lib:/lib:/usr/lib"
+      - "export CLASSPATH=$ORACLE_HOME/jlib:$ORACLE_HOME/rdbms/jlib"
+      - "export PATH=/usr/sbin:/usr/local/bin:$PATH"
+
+- name: 🚀  copier le fichier oracle-database-ee-21c-1.0-1.ol8.x86_64.rpm vers la VM
+  copy:
+    src: ~/Downloads/oracle-database-ee-21c-1.0-1.ol8.x86_64.rpm
+    dest: ~/oracle-database-ee-21c-1.0-1.ol8.x86_64.rpm
+    mode: 0775
+    owner: "root"
+    group: "root"
+
+- name: 🚀  installation d'oracle
+  dnf:
+    name: /root/oracle-database-ee-21c-1.0-1.ol8.x86_64.rpm
+    state: present
+  become: true  
+
+- name: enable firewall
+  service:
+    name:  firewalld
+    state: started
+    enabled: true
+
+- name: 🚀  configurer le parfeu
+  firewalld:
+    port: "{{ item.port }}/{{ item.proto }}"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  with_items:
+    - {port: "{{ LISTENER_PORT }}", proto: "tcp"}
+    - {port: "{{ EM_EXPRESS_PORT }}" , proto: "tcp"}
+
+- name: 🚀  configurer Selinux
+  shell: "sed -i 's/^SELINUX=.*/SELINUX=permissive/g' /etc/selinux/config"
+
+- name: 🚀  configurer selinux 
+  selinux:
+    state: permissive
+    policy: targeted
+    configfile: /etc/selinux/config 
+
+
+- name: 💤  redemarage de la VM ....
+  shell: "reboot"
+  async: 1
+  poll: 0
+
+- name: 🚧 reconnexion  ....
+  wait_for_connection:
+    connect_timeout: 5
+    delay: 20
+    sleep: 5
+    timeout: 100
+
+- name: 🚀  configuration de la base
+  become: true
+  shell: "/etc/init.d/oracledb_ORCLCDB-21c configure"
+
+- debug: msg="✅ ORACLE DB est installée avec succès !"
+
+- name: 🚀 verification si sqlplus est installé 
+  become_user: "{{ oracle_user }}"
+  become_method: sudo 
+  become_flags: "-i"
+  shell: "sqlplus -version"
+  register: sqlversion
+
+- debug: var=sqlversion.stdout
+
+- name: 🚀 déactiver IPv6
+  sysctl:
+    name: "{{ item }}"
+    value: 1
+    state: present
+    reload: "yes"
+  with_items:
+    - net.ipv6.conf.all.disable_ipv6
+
+  
+
+# - name : 🚀 copy du script 
+#   become_user: "{{ oracle_user }}"
+#   copy:
+#     dest: ./script.sql
+#     src: script.sql
+#     mode: 750
+#     remote_src: False
+#     owner: "{{ oracle_user }}"
+#     group: "{{ oracle_group }}"
+...

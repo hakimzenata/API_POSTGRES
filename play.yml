@@ -1,0 +1,8 @@
+---
+- hosts: all
+  become: true
+  roles:
+  - install_db
+  - deploy
+
+# sqlplus='rlwrap -pBlue -i -b '\''()=\!<>&+-*|:;,'\'' -f ~/sqlplus.wordlist sqlplus'

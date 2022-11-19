@@ -1,0 +1,8 @@
+---
+api: '3'
+services:
+  api_service:
+    ports:
+      - '1521:1521'
+    container_name: 'api_service'
+    image: 

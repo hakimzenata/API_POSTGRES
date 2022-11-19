@@ -1,0 +1,15 @@
+---
+# chemin absolue des applications oralce
+oracle_base: /opt/oracle
+# chemin absolue de la base oracle
+oracle_home: /opt/oracle/product/21c/dbhome_1
+# le répértoire de l'utilisateur oracle
+oracle_user_home: /home/oracle
+# utisateur oracle
+oracle_user: oracle
+# group oracle
+oracle_group: oinstall
+# nom de l'hôte 
+oracle_hostname:  "oracle-01.test.com"
+# NOM DE LA BASE
+oracle_db_name: PROD
