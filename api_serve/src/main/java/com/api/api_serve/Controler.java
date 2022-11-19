@@ -36,11 +36,11 @@ public class Controler {
         return this.service.addDept(d);
     }
 
-    @RequestMapping(value = "/update/{id}", method = RequestMethod.PUT,
+    @RequestMapping(value = "/update", method = RequestMethod.PUT,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Optional<Dept> updatedep(@PathVariable int id) {
-        return this.service.updateDep(id);
+    public Dept updatedep(@RequestBody Dept d) {
+        return this.service.updateDep(d);
     }
 
     @RequestMapping(value = "/rm/all",
